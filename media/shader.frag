@@ -12,8 +12,8 @@ uniform bool useMirrorBRDF;         // true if mirror brdf should be used (defau
 // texture maps
 //
 
+uniform sampler2D normalTextureSampler;
 uniform sampler2D diffuseTextureSampler;
-
 
 //
 // lighting environment definition. Scenes may contain directional
@@ -157,8 +157,9 @@ void main(void)
        // In other words:   tangent_space_normal = texture_value * 2.0 - 1.0;
 
        // replace this line with your implementation
-       N = normalize(normal);
-
+       vec3 normalW = texture(normalTextureSampler, texcoord).rgb;
+       normalW = normalW * 2.0 - 1.0;
+       N = normalize(tan2world * normalW);
     } else {
        N = normalize(normal);
     }
