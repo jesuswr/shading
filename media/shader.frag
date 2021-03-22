@@ -85,7 +85,7 @@ vec3 Phong_BRDF(vec3 L, vec3 V, vec3 N, vec3 diffuse_color, vec3 specular_color,
     // If the angle of reflection is greater than 1 then apply the Phong Term
     // Because then there is light to be reflected
     phongTerm = cosAngIncidence != 0.0 ? phongTerm : 0.0;
-    // The angle depends also on the specular exponent
+    // The angle depends also on the specular exponent which represents the roughness of the surface
     phongTerm = pow(phongTerm, specular_exponent);
 
     // Full Phong model (missing ambient light because the other parts of the shader already does that)
