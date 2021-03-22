@@ -71,7 +71,27 @@ vec3 Phong_BRDF(vec3 L, vec3 V, vec3 N, vec3 diffuse_color, vec3 specular_color,
     // Implement diffuse and specular terms of the Phong
     // reflectance model here.
 
-    return diffuse_color;
+    // Angle between the direction of the light and the normal of the surface (amount of light reflected)
+    float cosAngIncidence = dot(N, L);
+    cosAngIncidence = clamp(cosAngIncidence, 0, 1); // Clamp the dot product, because we don't want negative values. 
+                                                    // We don't want light that comes from below the surface
+
+    // The perfect direction were all the light is reflected, the full specular value
+    vec3 reflecDir = reflect(-L, N);
+
+    // Phong term is the angle between the perfect direction and the point of view
+    float phongTerm = dot(V, reflecDir);
+    phongTerm = clamp(phongTerm, 0, 1);
+    // If the angle of reflection is greater than 1 then apply the Phong Term
+    // Because then there is light to be reflected
+    phongTerm = cosAngIncidence != 0.0 ? phongTerm : 0.0;
+    // The angle depends also on the specular exponent
+    phongTerm = pow(phongTerm, specular_exponent);
+
+    // Full Phong model (missing ambient light because the other parts of the shader already does that)
+    vec3 outputColor = (diffuse_color * cosAngIncidence) + (specular_color * phongTerm);
+
+    return outputColor;
 
 }
 
