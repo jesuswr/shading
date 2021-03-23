@@ -14,6 +14,7 @@ uniform bool useMirrorBRDF;         // true if mirror brdf should be used (defau
 
 uniform sampler2D normalTextureSampler;
 uniform sampler2D diffuseTextureSampler;
+uniform sampler2D environmentTextureSampler;
 
 //
 // lighting environment definition. Scenes may contain directional
@@ -119,7 +120,22 @@ vec3 SampleEnvironmentMap(vec3 D)
     // (3) How do you convert theta and phi to normalized texture
     //     coordinates in the domain [0,1]^2?
 
-    return vec3(.25, .25, .25);    
+    // convertion to spherical coordinates:
+
+    // cos(theta) = D.y / r
+    // r == 1
+    D.x = -D.x;
+    float theta = acos(D.y);
+    theta /= PI;
+
+    // tan(phi) = D.x / D.z;
+    float phi = -atan(D.x, D.z);
+    phi += phi < 0.0 ? 2.0*PI : 0.0;
+    phi /= 2.0*PI;
+
+    vec2 texcoord = vec2(phi, theta);
+
+    return texture(environmentTextureSampler, texcoord).rgb;    
 }
 
 //
@@ -177,11 +193,12 @@ void main(void)
         // compute perfect mirror reflection direction here.
         // You'll also need to implement environment map sampling in SampleEnvironmentMap()
         //
-        vec3 R = normalize(vec3(1.0));
-        //
+
+        N = normalize(normal);
+        vec3 R = 2.0*dot(V,N)*N - V;
 
         // sample environment map
-        vec3 envColor = SampleEnvironmentMap(R);
+        vec3 envColor = SampleEnvironmentMap(normalize(R));
         
         // this is a perfect mirror material, so we'll just return the light incident
         // from the reflection direction
